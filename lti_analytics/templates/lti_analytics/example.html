@@ -1,0 +1,38 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="{% static 'bootstrap-3.3.4/css/bootstrap.min.css' %}" media="screen"/>
+    <link rel="stylesheet" type="text/css" href="{% static 'font-awesome-4.2.0/css/font-awesome.min.css' %}" media="screen"/>
+    {% block css %}{% endblock css %}
+    <script src="{% static 'jquery-1.10.2/jquery-1.10.2.js' %}"></script>
+    <script src="{% static 'bootstrap-3.3.4/js/bootstrap.min.js' %}"></script>
+    {% include 'interactions/interactions.html' %}
+    <script>
+        $(document).ready(function(){
+            $('.btn-interact').click(function(){
+                LTIAnalytics.pushInteraction({
+                    category: 'student',
+                    action: 'click',
+                    entity: $(this).html()
+                });
+            });
+        });
+    </script>
+    {% block js %}{% endblock js %}
+    <title>LTI Analytics Example</title>
+</head>
+<body>
+    <div class="container">
+        <div class="jumbotron" style="text-align:center;">
+            <h1>LTI Analytics Example</h1>
+            <p>
+                <button class="btn btn-lg btn-success btn-interact" role="button">Interaction 1</button>
+                <button class="btn btn-lg btn-success btn-interact" role="button">Interaction 2</button>
+            </p>
+        </div>
+    </div>
+</body>
+</html>

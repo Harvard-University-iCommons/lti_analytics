@@ -1,0 +1,134 @@
+<script>
+    /*!
+     * jQuery Cookie Plugin v1.3.1
+     * https://github.com/carhartl/jquery-cookie
+     *
+     * Copyright 2013 Klaus Hartl
+     * Released under the MIT license
+     */
+    (function ($, document, undefined) {
+
+        var pluses = /\+/g;
+
+        function raw(s) {
+            return s;
+        }
+
+        function decoded(s) {
+            return unRfc2068(decodeURIComponent(s.replace(pluses, ' ')));
+        }
+
+        function unRfc2068(value) {
+            if (value.indexOf('"') === 0) {
+                // This is a quoted cookie as according to RFC2068, unescape
+                value = value.slice(1, -1).replace(/\\"/g, '"').replace(/\\\\/g, '\\');
+            }
+            return value;
+        }
+
+        function fromJSON(value) {
+            return config.json ? JSON.parse(value) : value;
+        }
+
+        var config = $.cookie = function (key, value, options) {
+
+            // write
+            if (value !== undefined) {
+                options = $.extend({}, config.defaults, options);
+
+                if (value === null) {
+                    options.expires = -1;
+                }
+
+                if (typeof options.expires === 'number') {
+                    var days = options.expires, t = options.expires = new Date();
+                    t.setDate(t.getDate() + days);
+                }
+
+                value = config.json ? JSON.stringify(value) : String(value);
+
+                return (document.cookie = [
+                    encodeURIComponent(key), '=', config.raw ? value : encodeURIComponent(value),
+                    options.expires ? '; expires=' + options.expires.toUTCString() : '', // use expires attribute, max-age is not supported by IE
+                    options.path    ? '; path=' + options.path : '',
+                    options.domain  ? '; domain=' + options.domain : '',
+                    options.secure  ? '; secure' : ''
+                ].join(''));
+            }
+
+            // read
+            var decode = config.raw ? raw : decoded;
+            var cookies = document.cookie.split('; ');
+            var result = key ? null : {};
+            for (var i = 0, l = cookies.length; i < l; i++) {
+                var parts = cookies[i].split('=');
+                var name = decode(parts.shift());
+                var cookie = decode(parts.join('='));
+
+                if (key && key === name) {
+                    result = fromJSON(cookie);
+                    break;
+                }
+
+                if (!key) {
+                    result[name] = fromJSON(cookie);
+                }
+            }
+
+            return result;
+        };
+
+        config.defaults = {};
+
+        $.removeCookie = function (key, options) {
+            if ($.cookie(key) !== null) {
+                $.cookie(key, null, options);
+                return true;
+            }
+            return false;
+        };
+
+    })(jQuery, document);
+
+    function csrfSafeMethod(method) {
+        // these HTTP methods do not require CSRF protection
+        return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+    }
+    function sameOrigin(url) {
+        // test that a given url is a same-origin URL
+        // url could be relative or scheme relative or absolute
+        var host = document.location.host; // host + port
+        var protocol = document.location.protocol;
+        var sr_origin = '//' + host;
+        var origin = protocol + sr_origin;
+        // Allow absolute or scheme relative URLs to same origin
+        return (url == origin || url.slice(0, origin.length + 1) == origin + '/') ||
+            (url == sr_origin || url.slice(0, sr_origin.length + 1) == sr_origin + '/') ||
+            // or any other URL that isn't scheme relative or absolute i.e relative.
+            !(/^(\/\/|http:|https:).*/.test(url));
+    }
+    $.ajaxSetup({
+        beforeSend: function(xhr, settings) {
+            if (!csrfSafeMethod(settings.type) && sameOrigin(settings.url)) {
+                // Send the token to same-origin, relative URLs only.
+                // Send the token only if the method warrants CSRF protection
+                // Using the CSRFToken value acquired earlier
+                xhr.setRequestHeader("X-CSRFToken", $.cookie('csrftoken'));
+            }
+        }
+    });
+
+    window.globals = window.globals || {};
+    window.globals.INTERACTION_URL = "{% url 'interactions:interaction' %}";
+    var LTIAnalytics = {
+        pushInteraction: function(interaction){
+            $.ajax({
+                method: 'POST',
+                url: window.globals.INTERACTION_URL,
+                contentType: 'application/json',
+                dataType: 'json',
+                data: JSON.stringify(interaction)
+            });
+        }
+    };
+</script>

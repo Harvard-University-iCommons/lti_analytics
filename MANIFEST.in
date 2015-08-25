@@ -1,0 +1,1 @@
+recursive-include interactions *.py *.html *.js
