@@ -8,7 +8,7 @@ Easily add user interaction data collection to your LTI tools.
 
 #### Installation
 
-1. pip install -e git@github.com:Harvard-University-iCommons/lti_analytics.git@develop#egg=lti_analytics==develop
+1. Run `pip install git+ssh://git@github.com/Harvard-University-iCommons/lti_analytics.git@develop#egg=lti_analytics==develop`
 
 2. Add `interactions` to INSTALLED_APPS.
 
